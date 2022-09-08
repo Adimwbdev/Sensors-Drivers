@@ -1,0 +1,71 @@
+// Notes kai diorthwseis sto HUBDUB
+
+H parakatw routina afora tin leitourgia toy buffer alla me tin eisagwgi kai 3ou sensor(magnetometer)
+dipla einai oi times pou diavazw twra kai kapoia sxolia
+
+
+thereturn_t THEHUB::fifo_conf(uint8_t* buff)
+{
+thereturn_t caution;
+uint8_t dabuff;
+
+extrn_read(buff);
+slv_0conf(buff);
+accel_scaleset(buff);           0x13 --> pou simainei oti exei parei tis arxikes tou times apo prin dld apo tin extrn_read()
+gyro_scaleset(&dabuff);		0x02 --> edw einai ok giati i extrn_read den ruthmizei to gyto			--> ok! 		
+fifo_watermark(buff, 630);	0x76 --> LSB    0x02-->msb  -->  o sundiasmos tous vgazei oso eixa valei (630)	--> ok! 
+fifo_mode(buff);		0x06 --> swsta									--> ok!
+fifodec_accel(buff);		0x01 --> swsta, no decimation gia to accel					--> ok!
+fifodec_gyro(buff);		0x09 --> swsta, no decimation kai gia to gyro					--> ok!
+fifodec_mag(buff);		0x02 --> swsta, 3rd fifo dataset (mag) kai einai me decimation 2		--> ok!
+func_cfg_en(buff);		0x80 --> enable external functions						--> ok!
+i2c_mast_en(buff);		0x04 --> enable external functionalities					--> ok!
+fifo_odr(buff);			
+accel_ODRset(buff);
+gyro_ODRset(buff);
+
+*buff = dabuff;
+caution = ALLGOOD;
+
+return caution;
+
+}
+
+
+
+////////////////////////////////////////////////////////
+
+H parakatw routina einai gia tin leitourgia tou buffer, xwris aux sensor mono me gyro kai accel, apli diladi leitourgia
+
+
+thereturn_t THEHUB::fifodefault(uint8_t* buff)
+{
+thereturn_t caution;
+uint8_t dabuff;
+
+accel_scaleset(buff);  //FS einai 2 alla ousiastika einai san na einai kleisto to accel,den vazoume kapoia alli timi		ok!
+
+gyro_scaleset(buff);  //To mono pou allazei einai to bit gia to FS pou einai 125dps						ok!
+
+fifo_watermark(buff, 480); // apo oti fainetai swsta to ftiaxnei to threshold							ok!
+
+fifo_mode(buff);//
+
+fifodec_accel(buff); //no decimation												ok!
+
+fifodec_gyro(buff);  // no decimation												ok!
+
+fifo_odr(buff);
+
+accel_ODRset(buff);
+
+gyro_ODRset(buff);
+
+caution = ALLGOOD;
+
+return caution;
+}
+
+
+
+
